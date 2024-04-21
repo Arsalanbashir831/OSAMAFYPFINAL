@@ -46,7 +46,7 @@ const LiveMatchPage = () => {
         overs: getRandomOvers(5, 20),
       };
       console.log(data)
-      fetch('https://fictional-journey-9jrwvgpr67q3xpr7-4000.app.github.dev/predict', {
+      fetch('http://127.0.0.1:4000/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

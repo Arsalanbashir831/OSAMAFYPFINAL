@@ -138,6 +138,7 @@
                     name="overs"
                     class="form-control"
                     required
+                    
                   />
                 </div>
                 <button type="submit" class="btn btn-primary">
@@ -250,6 +251,24 @@
               predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">Error: Could not retrieve prediction.</div>`;
               predictionResult.style.display = "block";
             });
+        });
+
+
+        function preventNegativeInput(inputElement) {
+          inputElement.addEventListener('input', function() {
+            if (this.value < 0) {
+              this.value = ''; // Clear the input if negative value is entered
+            }
+          });
+        }
+      
+        // Get the input elements by their IDs and apply the validation
+        document.addEventListener('DOMContentLoaded', function() {
+          const ballsFacedInput = document.getElementById('balls_faced');
+          const oversInput = document.getElementById('overs');
+      
+          preventNegativeInput(ballsFacedInput);
+          preventNegativeInput(oversInput);
         });
     </script>
     <script>

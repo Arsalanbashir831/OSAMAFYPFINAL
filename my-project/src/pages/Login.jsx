@@ -52,7 +52,8 @@ const Login = () => {
           />
         </Form.Item>
         <Form.Item>
-          <a className="login-form-forgot float-right" href="#" onClick={(e) => e.preventDefault()}>
+
+          <a className="login-form-forgot float-right" href="/forgot">
             Forgot password
           </a>
         </Form.Item>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, List, Avatar, Badge, Typography, Tabs , Divider } from 'antd';
+import { Card, List, Avatar, Badge, Typography, Tabs, Divider } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -20,11 +20,34 @@ const listItemVariant = {
   visible: { x: 0, opacity: 1 },
 };
 
+
+
 const LiveMatchPage = () => {
-const location = useLocation()  
-const {matchDetails} = location.state
+  const location = useLocation()
+  const { matchDetails } = location.state
+  const [stats, setStats] = useState([]);
+  useEffect(() => {
+    // console.log(matchDetails);
+    // console.log(matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"]);
+    matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"].forEach((player) => {
+      setStats(prev => [
+        ...prev,
+        [
+          player.player || "Unknown", // If player's name is null, default to "Unknown"
+          player.R || '0',              // If runs (R) are null, default to 0
+          player.B || '0',              // If balls faced (B) are null, default to 0
+          player['4s'] || '0',          // If number of 4s is null, default to 0
+          player['6s'] || '0',          // If number of 6s is null, default to 0
+          player.SR || '0',             // If strike rate (SR) is null, default to 0
+          matchDetails.event_away_team || "Unknown Team" // If away team is null, default to "Unknown Team"
+        ]
+      ]);
+    });
+    
+  }, []);
   // Assuming scorecard is an object where each key is an innings
   const renderScoreCard = (scorecard) => {
+    console.log(stats);
     const inningsNames = Object.keys(scorecard || {});
     return inningsNames.map(inningsName => (
       <List
@@ -32,7 +55,8 @@ const {matchDetails} = location.state
         header={<div>{inningsName}</div>}
         itemLayout="horizontal"
         dataSource={scorecard[inningsName]}
-        renderItem={item => (
+        renderItem={(item, index) => (
+
           <List.Item>
             <List.Item.Meta
               title={<span>{item.player}</span>}

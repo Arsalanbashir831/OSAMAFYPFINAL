@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, message } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../Connection/DB';
 
 const Signup = () => {
   const [loading, setLoading] = useState(false);
@@ -13,27 +14,16 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:4000/signup', {
-        username: values.username,
-        password: values.password
-      });
-
-      if (response.status === 201) {
-        message.success('Login successful!');
-        navigate('/'); // Redirect on successful login
-      } else {
-        // As it's unusual to hit this block because errors usually throw an exception, just in case
-        message.error('Unexpected status code returned.');
-      }
+      // Use Firebase Authentication to create a new user
+      const userCredential = await createUserWithEmailAndPassword(auth, values.username, values.password);
+      console.log('Firebase user created: ', userCredential.user);
+      message.success('Signup successful!');
+      navigate('/'); // Redirect on successful signup
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        message.error('Wrong credentials, please try again.');
-      } else {
-        message.error('signup failed. Please try again later.');
-      }
-      console.log(error);
+      console.error('Signup error: ', error);
+      message.error(error.message); // Display Firebase error message
     } finally {
-      setLoading(false); // Ensure loading is false after handling the response
+      setLoading(false); // Ensure loading is stopped after handling the response
     }
   };
 
@@ -48,9 +38,9 @@ const Signup = () => {
         <h1 className='text-xl font-bold py-5 text-center'>Signup</h1>
         <Form.Item
           name="username"
-          rules={[{ required: true, message: 'Please input your Username!' }]}
+          rules={[{ required: true, message: 'Please input your Email!' }]}
         >
-          <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+          <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Email" />
         </Form.Item>
         <Form.Item
           name="password"

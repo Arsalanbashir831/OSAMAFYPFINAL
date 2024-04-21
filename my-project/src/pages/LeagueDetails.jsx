@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, List, Avatar, Badge, Typography, Tabs, Divider } from 'antd';
+import { Card, List, Avatar, Badge, Typography, Tabs, Divider, message } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -23,6 +23,10 @@ const listItemVariant = {
 
 
 const LiveMatchPage = () => {
+  function getRandomOvers(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
   const location = useLocation()
   const { matchDetails } = location.state
   const [stats, setStats] = useState([]);
@@ -30,21 +34,84 @@ const LiveMatchPage = () => {
     // console.log(matchDetails);
     // console.log(matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"]);
     matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"].forEach((player) => {
-      setStats(prev => [
-        ...prev,
-        [
-          player.player || "Unknown", // If player's name is null, default to "Unknown"
-          player.R || '0',              // If runs (R) are null, default to 0
-          player.B || '0',              // If balls faced (B) are null, default to 0
-          player['4s'] || '0',          // If number of 4s is null, default to 0
-          player['6s'] || '0',          // If number of 6s is null, default to 0
-          player.SR || '0',             // If strike rate (SR) is null, default to 0
-          matchDetails.event_away_team || "Unknown Team" // If away team is null, default to "Unknown Team"
-        ]
-      ]);
+
+      const data = {
+        Player: player.player || "Unknown", // If player's name is null, default to "Unknown"
+        balls_faced: player.R || '0',              // If runs (R) are null, default to 0
+        // player.B || '0',              // If balls faced (B) are null, default to 0
+        // player['4s'] || '0',          // If number of 4s is null, default to 0
+        // player['6s'] || '0',          // If number of 6s is null, default to 0
+        // player.SR || '0',             // If strike rate (SR) is null, default to 0
+        Opposition: matchDetails.event_away_team || "Unknown Team", // If away team is null, default to "Unknown Team"},
+        overs: getRandomOvers(5, 20),
+      };
+      console.log(data)
+      fetch('https://fictional-journey-9jrwvgpr67q3xpr7-4000.app.github.dev/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(data),
+      })
+        .then(response => response.json())
+        .then(info => {
+          // console.log(info);
+          // Display the prediction result using Bootstrap's alert for aesthetics
+          setStats(prev => [
+            ...prev,
+            {
+              player: player.player || "Unknown", // If player's name is null, default to "Unknown"
+              R: player.R || '0',              // If runs (R) are null, default to 0
+              B: player.B || '0',              // If balls faced (B) are null, default to 0
+              '4s':  player['4s'] || '0',          // If number of 4s is null, default to 0
+              '6s': player['6s'] || '0',          // If number of 6s is null, default to 0
+              'SR':  player.SR || '0',             // If strike rate (SR) is null, default to 0
+              opposition: matchDetails.event_away_team || "Unknown Team", // If away team is null, default to "Unknown Team"
+              predicted_runs: info.predicted_runs || "0",
+              message: info.message || "Unknown"
+            }
+          ]);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          // Optionally handle errors by displaying them in a similar styled alert
+
+          // const predictionResult = document.getElementById('predictionResult');
+          // predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">Error: Could not retrieve prediction.</div>`;
+          // predictionResult.style.display = 'block';
+        });
+
+
     });
-    
+
+    // console.log(stats);
+
   }, []);
+
+
+  function getPrediction(data) {
+    fetch('/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Display the prediction result using Bootstrap's alert for aesthetics
+
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Optionally handle errors by displaying them in a similar styled alert
+        const predictionResult = document.getElementById('predictionResult');
+        predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">Error: Could not retrieve prediction.</div>`;
+        predictionResult.style.display = 'block';
+      });
+  }
+
   // Assuming scorecard is an object where each key is an innings
   const renderScoreCard = (scorecard) => {
     console.log(stats);
@@ -54,7 +121,7 @@ const LiveMatchPage = () => {
         key={inningsName}
         header={<div>{inningsName}</div>}
         itemLayout="horizontal"
-        dataSource={scorecard[inningsName]}
+        dataSource={stats}
         renderItem={(item, index) => (
 
           <List.Item>
@@ -69,6 +136,7 @@ const LiveMatchPage = () => {
                     <span>4s: {item['4s']}</span>
                     <span>6s: {item['6s']}</span>
                     <span>SR: {item.SR}</span>
+                    <span>Predicted Runs: {item.predicted_runs}</span>
                   </div>
                 </>
               }

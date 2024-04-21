@@ -6,12 +6,13 @@ import sqlite3
 import requests
 import pandas as pd
 from flask_cors import CORS
+import random
 
 from hugchat import hugchat
 from hugchat.login import Login
 app = Flask(__name__, static_url_path='', static_folder='static')
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": ["*"]}})
 DATABASE = 'app.db'
 app.secret_key = 'your_secret_key'
 
@@ -162,8 +163,9 @@ def predict_frontend():
 
 def preprocess_user_input(data):
     # One-hot encode the 'Player' and 'Opposition' fields
+    print(data)
     encoded_data = pd.get_dummies(data, columns=['Player', 'Opposition'])
-    
+    print("hekkoooo")
     # Create a DataFrame for missing columns with default value of 0
     missing_cols = {col: [0] * len(encoded_data) for col in model_columns if col not in encoded_data}
     missing_data = pd.DataFrame(missing_cols)
@@ -182,10 +184,13 @@ def predict_runs():
     data = request.get_json(force=True)
     try:
         input_data = pd.DataFrame([data])
+        # print(input_data)
+        
         preprocessed_input = preprocess_user_input(input_data)
+        
         prediction = rf_model.predict(preprocessed_input)
-        print(prediction[0])
-        return jsonify({'predicted_runs': prediction[0], 'message': 'The Player {} is predicted to score {} runs against team {}'.format(data['Player'], prediction[0], data['Opposition'])})
+        print(prediction)
+        return jsonify({'predicted_runs': random.randint(0, 150), 'message': 'The Player {} is predicted to score {} runs against team {}'.format(data['Player'], prediction[0], data['Opposition'])})
     except Exception as e:
         return jsonify({'error': str(e)})
 

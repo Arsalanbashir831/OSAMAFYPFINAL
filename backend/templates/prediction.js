@@ -4,14 +4,14 @@ document.getElementById('predictionForm').addEventListener('submit', function(e)
     const player = document.getElementById('player').value;
     const opposition = document.getElementById('opposition').value;
     const ballsFaced = document.getElementById('balls_faced').value;
-    const overs = document.getElementById('overs').value;
+    // const overs = document.getElementById('overs').value;
 
     // Construct the data to send in the request
     const data = {
         player: player,
         opposition: opposition,
         balls_faced: ballsFaced,
-        overs: overs
+        overs: 20,
     };
 
     // Make a POST request to the Flask server

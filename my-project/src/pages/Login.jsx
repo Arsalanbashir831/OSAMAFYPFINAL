@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, message } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../Connection/DB';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -10,28 +11,16 @@ const Login = () => {
 
   const onFinish = async (values) => {
     console.log('Received values of form: ', values);
-    setLoading(true); // Set loading before API call
+    setLoading(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:4000/login', {
-        username: values.username,
-        password: values.password
-      });
-
-      if (response.status === 200) {
-        message.success('Login successful!');
-        navigate('/'); // Redirect on successful login
-      } else {
-        // As it's unusual to hit this block because errors usually throw an exception, just in case
-        message.error('Unexpected status code returned.');
-      }
+      const userCredential = await signInWithEmailAndPassword(auth, values.username, values.password);
+      console.log('Logged in user:', userCredential.user);
+      message.success('Login successful!');
+      navigate('/'); // Redirect on successful login
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        message.error('Wrong credentials, please try again.');
-      } else {
-        message.error('Login failed. Please try again later.');
-      }
-      console.log(error);
+      console.error('Login error:', error);
+      message.error('Wrong credentials, please try again.' + error);
     } finally {
       setLoading(false); // Ensure loading is false after handling the response
     }
@@ -48,9 +37,9 @@ const Login = () => {
         <h1 className='text-xl font-bold py-5 text-center'>Login</h1>
         <Form.Item
           name="username"
-          rules={[{ required: true, message: 'Please input your Username!' }]}
+          rules={[{ required: true, message: 'Please input your Email!' }]}
         >
-          <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+          <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Email" />
         </Form.Item>
         <Form.Item
           name="password"

@@ -3,9 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Spin, Alert, Card } from 'antd'; // Using Ant Design Card
 import { apikey } from '../utils';
-
-
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../Connection/DB';
 const Home = () => {
+  useEffect(() => {
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate('/login');
+      }
+    });
+
+  }, []);
+
+
   const [matchDetails, setMatchDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,10 +48,10 @@ const Home = () => {
           hoverable
           onClick={() => navigate('/leagueDetails', { state: { matchDetails: data } })}
           className="transition duration-300 ease-in-out transform hover:scale-105"
-          cover={<img alt="Home Team Logo" src={data.event_home_team_logo} style={{ height: 150,width:150, objectFit: 'cover' }} />}
+          cover={<img alt="Home Team Logo" src={data.event_home_team_logo} style={{ height: 150, width: 150, objectFit: 'cover' }} />}
         >
           <Card.Meta
-            avatar={<img src={data.event_away_team_logo} alt="Away Team Logo" style={{ width: 40, width:40 ,borderRadius: '50%' }} />}
+            avatar={<img src={data.event_away_team_logo} alt="Away Team Logo" style={{ width: 40, width: 40, borderRadius: '50%' }} />}
             title={`${data.event_home_team} vs ${data.event_away_team}`}
             description={
               <div>

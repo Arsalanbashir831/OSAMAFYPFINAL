@@ -14,14 +14,14 @@ const Chatbot = () => {
   const handleSubmit = async () => {
     if (!input.trim()) return;
 
-    // Add user message to the chat history
+    // Update chat history with user message
     const newMessages = [...messages, { text: input, sender: 'user' }];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
 
     try {
-      // Make POST request to chatbot API
+      // Send message to chatbot API
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
@@ -34,12 +34,12 @@ const Chatbot = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer sk-proj-CzaaQ41bCc4yvomfcV66T3BlbkFJMTMaU5gyfp8uOngSaDlc' 
+            Authorization: 'Bearer sk-proj-3nLLNkVntHbtYCjZsYG5T3BlbkFJtxuSmgM1ZT1zuZ43wCy9' // Replace with your OpenAI API key
           }
         }
       );
 
-      // Add bot response to the chat history
+      // Update chat history with bot response
       const botResponse = response.data.choices[0].message.content;
       newMessages.push({ text: botResponse, sender: 'bot' });
       setMessages(newMessages);
@@ -66,7 +66,7 @@ const Chatbot = () => {
           >
             <div
               className={`inline-block rounded px-3 py-2 ${
-                message.sender === 'user' ? 'bg-blue-200' : 'bg-gray-200'
+                message.sender === 'user' ? 'bg-blue-200 text-white' : 'bg-gray-200'
               }`}
             >
               {message.text}

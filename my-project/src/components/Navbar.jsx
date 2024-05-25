@@ -3,6 +3,7 @@ import { Menu, Dropdown } from 'antd';
 import { UserOutlined, MenuOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/logo.png'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,7 +56,7 @@ const Navbar = () => {
   return (
     <div className="bg-blue-900 text-white">
       <div className="container mx-auto p-4 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold">CricApp</Link>
+        <Link to="/" className=" font-bold"> <img height={100}  width={100} src={logo}/> </Link>
         <div className="hidden md:flex space-x-4">
           {navLinks.map(link => link.isExternal ? (
             <a key={link.name} href={link.path} target="_blank" rel="noopener noreferrer" className="hover:text-gray-300">

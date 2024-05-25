@@ -152,7 +152,7 @@ const LiveMatchPage = () => {
       animate="visible"
       variants={cardVariant}
       transition={{ duration: 0.5 }}
-      className="container mx-auto p-4"
+      className="bg-gradient-to-br from-blue-800 to-purple-900  mx-auto p-4"
     >
       <Card className="mb-4 shadow-lg">
         <div className="text-center">
@@ -173,7 +173,7 @@ const LiveMatchPage = () => {
         </div>
       </Card>
 
-      <Tabs defaultActiveKey="1" type="card">
+      <Tabs defaultActiveKey="1" type="card" className='bg-white px-3 py-3'>
         <TabPane tab="Lineups" key="1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

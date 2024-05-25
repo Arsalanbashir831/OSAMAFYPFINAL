@@ -31,7 +31,9 @@ const League = () => {
 
   return (
     <>
-      <div className="px-4 py-5 my-5 text-center">
+    <div className='bg-blue-900'>
+
+      <div className="px-4 py-5  text-center">
         <Input
           placeholder="Search leagues"
           value={search}
@@ -39,11 +41,12 @@ const League = () => {
           style={{ width: 300 }}
         />
       </div>
-      <div className="flex flex-wrap justify-center">
+      <div className="flex flex-wrap justify-center ">
         {filteredLeagues.map(league => (
           <LeagueCard key={league.league_key} league={league} />
         ))}
       </div>
+    </div>
     </>
   );
 };

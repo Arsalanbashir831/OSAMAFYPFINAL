@@ -57,7 +57,7 @@ const Player = () => {
     ];
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
+        <div className=" mx-auto p-4 bg-blue-900">
             <Card className="border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="flex flex-col items-center">
                     <img className="w-32 h-32 rounded-full mt-4" alt="Player" src={data?.playerImg || "https://h.cricapi.com/img/icon512.png"} />

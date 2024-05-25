@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card, List, Avatar, Badge, Typography, Tabs, Divider, message } from 'antd';
+import { Card, List, Avatar, Badge, Typography, Tabs, Divider, Modal, Button } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { apikey } from '../utils';
 import { useLocation } from 'react-router-dom';
-
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -15,37 +14,25 @@ const cardVariant = {
   visible: { opacity: 1, scale: 1 },
 };
 
-const listItemVariant = {
-  hidden: { x: -10, opacity: 0 },
-  visible: { x: 0, opacity: 1 },
-};
-
-
-
 const LiveMatchPage = () => {
   function getRandomOvers(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  const location = useLocation()
-  const { matchDetails } = location.state
+  const location = useLocation();
+  const { matchDetails } = location.state;
   const [stats, setStats] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+ 
   useEffect(() => {
-    // console.log(matchDetails);
-    // console.log(matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"]);
     matchDetails.scorecard[matchDetails.event_home_team + " 1 INN"].forEach((player) => {
-
       const data = {
-        Player: player.player || "Unknown", // If player's name is null, default to "Unknown"
-        balls_faced: player.R || '0',              // If runs (R) are null, default to 0
-        // player.B || '0',              // If balls faced (B) are null, default to 0
-        // player['4s'] || '0',          // If number of 4s is null, default to 0
-        // player['6s'] || '0',          // If number of 6s is null, default to 0
-        // player.SR || '0',             // If strike rate (SR) is null, default to 0
-        Opposition: matchDetails.event_away_team || "Unknown Team", // If away team is null, default to "Unknown Team"},
+        Player: player.player || "Unknown",
+        balls_faced: player.R || '0',
+        Opposition: matchDetails.event_away_team || "Unknown Team",
         overs: getRandomOvers(5, 20),
       };
-      console.log(data)
       fetch('http://127.0.0.1:4000/predict', {
         method: 'POST',
         headers: {
@@ -56,18 +43,16 @@ const LiveMatchPage = () => {
       })
         .then(response => response.json())
         .then(info => {
-          // console.log(info);
-          // Display the prediction result using Bootstrap's alert for aesthetics
           setStats(prev => [
             ...prev,
             {
-              player: player.player || "Unknown", // If player's name is null, default to "Unknown"
-              R: player.R || '0',              // If runs (R) are null, default to 0
-              B: player.B || '0',              // If balls faced (B) are null, default to 0
-              '4s':  player['4s'] || '0',          // If number of 4s is null, default to 0
-              '6s': player['6s'] || '0',          // If number of 6s is null, default to 0
-              'SR':  player.SR || '0',             // If strike rate (SR) is null, default to 0
-              opposition: matchDetails.event_away_team || "Unknown Team", // If away team is null, default to "Unknown Team"
+              player: player.player || "Unknown",
+              R: player.R || '0',
+              B: player.B || '0',
+              '4s': player['4s'] || '0',
+              '6s': player['6s'] || '0',
+              'SR': player.SR || '0',
+              opposition: matchDetails.event_away_team || "Unknown Team",
               predicted_runs: info.predicted_runs || "0",
               message: info.message || "Unknown"
             }
@@ -75,46 +60,21 @@ const LiveMatchPage = () => {
         })
         .catch((error) => {
           console.error('Error:', error);
-          // Optionally handle errors by displaying them in a similar styled alert
-
-          // const predictionResult = document.getElementById('predictionResult');
-          // predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">Error: Could not retrieve prediction.</div>`;
-          // predictionResult.style.display = 'block';
         });
-
-
     });
+  }, [matchDetails]);
 
-    // console.log(stats);
+  const showPlayerDetails = (player) => {
+    setSelectedPlayer(player);
+    setModalVisible(true);
+  };
 
-  }, []);
+  const handleCancel = () => {
+    setModalVisible(false);
+    setSelectedPlayer(null);
+  };
 
-
-  function getPrediction(data) {
-    fetch('/predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(response => response.json())
-      .then(data => {
-        // Display the prediction result using Bootstrap's alert for aesthetics
-
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        // Optionally handle errors by displaying them in a similar styled alert
-        const predictionResult = document.getElementById('predictionResult');
-        predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">Error: Could not retrieve prediction.</div>`;
-        predictionResult.style.display = 'block';
-      });
-  }
-
-  // Assuming scorecard is an object where each key is an innings
   const renderScoreCard = (scorecard) => {
-    console.log(stats);
     const inningsNames = Object.keys(scorecard || {});
     return inningsNames.map(inningsName => (
       <List
@@ -123,8 +83,7 @@ const LiveMatchPage = () => {
         itemLayout="horizontal"
         dataSource={stats}
         renderItem={(item, index) => (
-
-          <List.Item>
+          <List.Item onClick={() => showPlayerDetails(item)} className="cursor-pointer">
             <List.Item.Meta
               title={<span>{item.player}</span>}
               description={
@@ -136,7 +95,7 @@ const LiveMatchPage = () => {
                     <span>4s: {item['4s']}</span>
                     <span>6s: {item['6s']}</span>
                     <span>SR: {item.SR}</span>
-                    <span>Predicted Runs: {item.predicted_runs}</span>
+                    <span>Predicted Runs: {parseInt(item.predicted_runs / 4)}</span>
                   </div>
                 </>
               }
@@ -234,6 +193,43 @@ const LiveMatchPage = () => {
           {renderScoreCard(matchDetails.scorecard)}
         </TabPane>
       </Tabs>
+
+      <Modal
+        title={selectedPlayer?.player}
+        visible={modalVisible}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="close" onClick={handleCancel}>
+            Close
+          </Button>,
+        ]}
+        className="rounded-lg"
+      >
+        {selectedPlayer && (
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <Avatar size={64} icon={<UserOutlined />} />
+              <div>
+                <Title level={4}>{selectedPlayer.player}</Title>
+                <Text>{selectedPlayer.opposition}</Text>
+              </div>
+            </div>
+            <Divider />
+            <div className="grid grid-cols-2 gap-4">
+              <div><Text strong>Runs:</Text> {selectedPlayer.R}</div>
+              <div><Text strong>Balls Faced:</Text> {selectedPlayer.B}</div>
+              <div><Text strong>4s:</Text> {selectedPlayer['4s']}</div>
+              <div><Text strong>6s:</Text> {selectedPlayer['6s']}</div>
+              <div><Text strong>Strike Rate:</Text> {selectedPlayer.SR}</div>
+              <div><Text strong>Predicted Runs:</Text> {parseInt(selectedPlayer.predicted_runs/4)}</div>
+            </div>
+            <Divider />
+            <div>
+              <Text strong>Message:</Text> {selectedPlayer.message}
+            </div>
+          </div>
+        )}
+      </Modal>
     </motion.div>
   );
 };

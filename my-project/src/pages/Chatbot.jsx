@@ -21,26 +21,27 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      // Send message to chatbot API
+      // Send message to Google Gemini API
       const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwC1h6sQ2BDpyyN92GJl5eMrkrwb0KNaI',
         {
-          model: 'gpt-3.5-turbo',
-          messages: [
-            { role: 'system', content: 'You are a helpful cricket assistant.' },
-            { role: 'user', content: input }
+          contents: [
+            {
+              parts: [
+                { text: input }
+              ]
+            }
           ]
         },
         {
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer sk-proj-3nLLNkVntHbtYCjZsYG5T3BlbkFJtxuSmgM1ZT1zuZ43wCy9' // Replace with your OpenAI API key
+            'Content-Type': 'application/json'
           }
         }
       );
-
+    console.log(response.data.candidates[0].content.parts[0].text);
       // Update chat history with bot response
-      const botResponse = response.data.choices[0].message.content;
+      const botResponse = response.data.candidates[0].content.parts[0].text;
       newMessages.push({ text: botResponse, sender: 'bot' });
       setMessages(newMessages);
     } catch (error) {
@@ -52,10 +53,9 @@ const Chatbot = () => {
       });
       setMessages(newMessages);
     }
-
+    
     setLoading(false);
-  };
-
+  }
   return (
     <div className="max-w-2xl mx-auto my-10 p-4 bg-white shadow-lg rounded">
       <div className="h-96 mb-4 overflow-auto p-2">

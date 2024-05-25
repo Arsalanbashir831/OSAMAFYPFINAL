@@ -14,7 +14,7 @@ const PlayersList = () => {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`https://api.cricapi.com/v1/players?apikey=a2d5f255-eeb1-41c3-b8d9-c526e997397e&offset=${offset}&search=${search}`)
+    axios.get(`https://api.cricapi.com/v1/players?apikey=a301681d-ac0b-44e7-9b9d-05af37bb343c&offset=${offset}&search=${search}`)
       .then(response => {
         if (Array.isArray(response.data.data)) {
           setPlayers(response.data.data);
